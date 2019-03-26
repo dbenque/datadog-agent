@@ -43,6 +43,7 @@ type LogsConfig struct {
 	Source          string
 	SourceCategory  string
 	Tags            []string
+	DirectoryAsTag  bool `mapstructure:"directory_as_tag" json:"directory_as_tag"`
 	ProcessingRules []*ProcessingRule `mapstructure:"log_processing_rules" json:"log_processing_rules"`
 }
 

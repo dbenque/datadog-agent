@@ -101,7 +101,7 @@ func (t *Tailer) setup(offset int64, whence int) error {
 	}
 
 	// adds metadata to enable users to filter logs by filename
-	t.tags = []string{fmt.Sprintf("filename:%s", filepath.Base(t.path))}
+	t.tags = t.buildTailerTags()
 
 	log.Info("Opening ", t.path)
 	f, err := openFile(fullpath)
@@ -115,6 +115,14 @@ func (t *Tailer) setup(offset int64, whence int) error {
 	t.decodedOffset = ret
 
 	return nil
+}
+
+func (t *Tailer) buildTailerTags() []string {
+	tags := []string{fmt.Sprintf("filename:%s", filepath.Base(t.path))}
+	if t.source.Config.DirectoryAsTag {
+		tags = append(tags, fmt.Sprintf("dirname:%s", filepath.Dir(t.path)))
+	}
+	return tags
 }
 
 // readForever lets the tailer tail the content of a file

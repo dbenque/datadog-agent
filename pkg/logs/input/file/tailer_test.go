@@ -61,6 +61,10 @@ func (suite *TailerTestSuite) TearDownTest() {
 	os.Remove(suite.testDir)
 }
 
+func TestTailerTestSuite(t *testing.T) {
+	suite.Run(t, new(TailerTestSuite))
+}
+
 func (suite *TailerTestSuite) TestTailFromBeginning() {
 	lines := []string{"hello world\n", "hello again\n", "good bye\n"}
 
@@ -170,11 +174,27 @@ func (suite *TailerTestSuite) TestOriginTagsWhenTailingFiles() {
 	tags := msg.Origin.Tags()
 	suite.Equal(1, len(tags))
 	suite.Equal("filename:"+filepath.Base(suite.testFile.Name()), tags[0])
-
 }
 
-func TestTailerTestSuite(t *testing.T) {
-	suite.Run(t, new(TailerTestSuite))
+func (suite *TailerTestSuite) TestDirTagWhenTailingFiles() {
+
+	dirTaggedSource := config.NewLogSource("", &config.LogsConfig{
+		Type:           config.FileType,
+		Path:           suite.testPath,
+		DirectoryAsTag: true,
+	})
+	sleepDuration := 10 * time.Millisecond
+	suite.tl = NewTailer(suite.outputChan, dirTaggedSource, suite.testPath, sleepDuration)
+	suite.tl.StartFromBeginning()
+
+	_, err := suite.testFile.WriteString("foo\n")
+	suite.Nil(err)
+
+	msg := <-suite.outputChan
+	tags := msg.Origin.Tags()
+	suite.Equal(2, len(tags))
+	suite.Equal("filename:"+filepath.Base(suite.testFile.Name()), tags[0])
+	suite.Equal("dirname:"+filepath.Dir(suite.testFile.Name()), tags[1])
 }
 
 func toInt(str string) int {

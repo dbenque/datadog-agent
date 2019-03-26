@@ -1,0 +1,3 @@
+features:
+  - |
+    Use directory_as_tag when tailing a file to have the directory added as a tag. Disabled by default.
