@@ -8,7 +8,9 @@ package logs
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"sync/atomic"
+	"time"
 
 	"github.com/DataDog/datadog-agent/pkg/logs/sender"
 	"github.com/DataDog/datadog-agent/pkg/util/log"
@@ -40,6 +42,8 @@ func Start() error {
 	if IsAgentRunning() {
 		return nil
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	// setup the sources and the services
 	sources := config.NewLogSources()
